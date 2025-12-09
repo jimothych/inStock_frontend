@@ -30,6 +30,7 @@
         {
           "image": "./assets/images/mock_loading_page.png",
           "resizeMode": "cover",
+          "imageWidth": 1700,
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
