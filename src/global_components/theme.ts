@@ -1,31 +1,22 @@
-import { Platform } from 'react-native';
+const theme = {
+  red: "#D9043D",
+  magenta: "#BF045B",
 
-const tintColorLight = '#0a7ea4';
+  maroon1: "#59023B",
+  maroon2: "#872D76",
+  maroon3: "#5D43B1",
+  blue: "#1E50F0",
 
-export const Colors = {
-  text: '#11181C',
-  background: '#fff',
-  tint: tintColorLight,
-  icon: '#687076',
-  tabIconDefault: '#687076',
-  tabIconSelected: tintColorLight,
+  purple1: "#2B0347",
+  purple2: "#210340",
+
+  white: "#FFFFFF",
+  white1: "#d4bfc8",
+  white2: "#eadee2",
+  white3: "#f8f4f5",
+  black: "#000000",
+
+  cyan: "#07DBF2"
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  }
-});
+export default theme;
