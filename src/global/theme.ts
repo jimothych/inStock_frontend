@@ -10,11 +10,16 @@ const theme = {
   purple1: "#2B0347",
   purple2: "#210340",
 
-  white: "#FFFFFF",
   white1: "#d4bfc8",
-  white2: "#eadee2",
+  white2: "#f2eaec",
   white3: "#f8f4f5",
+
+  white: "#FFFFFF",
   black: "#000000",
+  grey: "#808080",
+
+  grey1: "#76626b",
+  grey2: "#5e3656",
 
   cyan: "#07DBF2"
 };

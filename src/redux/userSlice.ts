@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserState } from '../global_components/global';
+
+export type UserState = {
+  photo: string | null;
+  name: string | null;
+  email: string | null;
+  id: string | null;
+}
 
 const initialState: UserState = {
   photo: null,

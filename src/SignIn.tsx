@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, Pressable } from 'react-native';
 import { StyleSheet, ImageBackground } from 'react-native';
-import { GlobalStyles } from './global_components/global';
+import { GlobalStyles } from './global/global';
 import { GoogleSignin, isNoSavedCredentialFoundResponse, User } from '@react-native-google-signin/google-signin';
 import { GSignIn, mapPayload } from "./googleSignIn";
-import theme from "./global_components/theme";
-import { UserState } from "./global_components/global";
-import { useNavigation } from "@react-navigation/native";
+import theme from "./global/theme";
+import { useNavigation, StackActions } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { setUser } from "./redux/userSlice";
+import { setUser, UserState } from "./redux/userSlice";
 
 export default function SignIn() {
   const navigation = useNavigation();
@@ -19,7 +18,6 @@ export default function SignIn() {
       webClientId: "366513490502-5ja2tekq3qn255g9b0d5gupkg90loo5o.apps.googleusercontent.com",
       iosClientId: "366513490502-t63q7meg415m6r4r6dva3qb269crs1p3.apps.googleusercontent.com"
     });
-    console.log("\n\tinside SignIn.tsx");
   }, []);
 
   useEffect(() => {
@@ -42,7 +40,7 @@ export default function SignIn() {
       const user: UserState = {
         photo: null,
         name: "DEMO",
-        email: "jameschang21205@gmail.com",
+        email: "instock@instock.com",
         id: "102674853057286251419",
       };
       navigateToMain(user);
@@ -60,14 +58,14 @@ export default function SignIn() {
       const user = mapPayload(payload);
       navigateToMain(user);
     } catch (error: unknown) {
-      console.log(error);
+      console.log(error); //do nothing
     }
   }
 
   function navigateToMain(user: UserState) {
     dispatch(setUser(user));
-    navigation.navigate("Main");
-    console.log(user);
+    navigation.dispatch(StackActions.replace('Main'));
+    console.log(`signed in | ${JSON.stringify(user)}`);
   }
 
   return (
@@ -84,21 +82,25 @@ export default function SignIn() {
       
       </Image>
       <Pressable 
-        style={styles.button1}
+        style={[GlobalStyles.big_button, { marginTop: 500 }]}
         onPress={() => handleGoogleSignIn(false)}
       >
-          <Image
-            source={require("../assets/googleLogoButton.png")}
-            style={styles.googleButton}
-          ></Image>
-          <Text style={[GlobalStyles.bold, {paddingLeft: 25, color: theme.purple2}]}>Google Sign In</Text>
+        <Image
+          source={require("../assets/googleLogoButton.png")}
+          style={styles.googleButton}
+        ></Image>
+        <Text style={[GlobalStyles.bold, {paddingLeft: 25, color: theme.purple2}]}>
+          Google Sign In
+        </Text>
       </Pressable>
 
       <Pressable 
-        style={styles.button2}
+        style={[GlobalStyles.big_button, { marginTop: 20 }]}
         onPress={() => handleGoogleSignIn(true)}
       >
-          <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>TAP HERE TO SEE DEMO</Text>
+        <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>
+          TAP HERE TO SEE DEMO
+        </Text>
       </Pressable>
     </ImageBackground>
   );
@@ -109,30 +111,6 @@ const styles = StyleSheet.create({
     width: "80%",
     height: "10%",
     marginTop: "25%",
-  },
-  button1: {
-    height: 70, 
-    width: "70%", 
-    borderWidth: 4, 
-    borderColor: theme.white2,
-    marginTop: 500, 
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.white,
-    borderRadius: 20,
-  },
-  button2: {
-    height: 70, 
-    width: "70%", 
-    borderWidth: 4, 
-    borderColor: theme.white2,
-    marginTop: 20, 
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.white,
-    borderRadius: 20,
   },
   googleButton: {
     position: "absolute",

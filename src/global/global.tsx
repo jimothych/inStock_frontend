@@ -1,0 +1,100 @@
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from 'react-native';
+import Toast from "react-native-toast-message";
+import theme from "./theme";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+type SafeAreaProps = {
+  children: React.ReactNode;
+  backgroundColor: string;
+};
+export function SafeArea(props: SafeAreaProps) {
+  return (
+    <SafeAreaView style={[GlobalStyles.container_column, { backgroundColor: props.backgroundColor }]}>
+      {props.children}
+    </SafeAreaView>
+  );
+}
+
+type HeaderProps = {
+  text: string;
+  isLoading?: boolean;
+}
+export function Header(props: HeaderProps) {
+  return (
+    <View style={GlobalStyles.header}>
+      <Text style={[GlobalStyles.bold, {color: theme.white3}]}>
+        {props.text}
+      </Text>
+    </View>
+  );
+}
+
+export function showDefaultToast() {
+  Toast.show({
+    type: 'error',
+    text1: "Error",
+    text2: "Please Contact Support",
+    visibilityTime: 4000,
+  });
+}
+
+export const GlobalStyles = StyleSheet.create({
+  container_column: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  container_card: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: "90%",
+    marginTop: 25,
+    padding: 30,
+    borderRadius: 8,
+  },
+  header: {
+    height: 35,
+    width: "100%",
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  big_button: {
+    height: 70, 
+    width: "70%", 
+    borderWidth: 4, 
+    borderColor: theme.white2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.white,
+    borderRadius: 16,
+  },
+  bold: {
+    fontFamily: 'Inter_28pt-Bold',
+    fontSize: 21
+  },
+  r: {
+    fontFamily: 'Inter_28pt-Regular',
+    fontSize: 17
+  },
+  bold_italic: {
+    fontFamily: 'Inter_28pt-BoldItalic',
+    fontSize: 21
+  },
+  italic: {
+    fontFamily: 'Inter_28pt-Italic',
+    fontSize: 17
+  },
+  light: {
+    fontFamily: 'Inter_28pt-Light',
+    fontSize: 14
+  },
+  light_italic: {
+    fontFamily: 'Inter_28pt-LightItalic',
+    fontSize: 14
+  },
+});
