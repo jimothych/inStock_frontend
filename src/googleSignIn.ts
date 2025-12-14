@@ -61,5 +61,8 @@ export function mapPayload(payload: User): UserState {
     name: payload.user.name,
     email: payload.user.email,
     photo: photoURL ?? null,
+    receiptsList: null,
+    currentNumProcessingDocs: 0,
+    isGlobalLoading: false,
   };
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "../redux/userSlice";
@@ -7,7 +7,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useNavigation, StackActions } from "@react-navigation/native";
 import { RootState } from "../redux/store";
 import theme from "../global/theme";
-import { GlobalStyles, SafeArea } from "../global/global";
+import { GlobalStyles, SafeArea, Scroll } from "../global/global";
 import Toast from "react-native-toast-message";
 
 export default function Profile() {
@@ -29,6 +29,7 @@ export default function Profile() {
 
   return (
     <SafeArea backgroundColor={theme.purple2}>
+      <Scroll>
       <View style={[GlobalStyles.container_card, { backgroundColor: theme.white2, marginTop: 10 }]}>
         <Image
           style={styles.profile_pic}
@@ -41,6 +42,7 @@ export default function Profile() {
           {userSlice.email}
         </Text>
       </View>
+      </Scroll>
 
       <Pressable 
         style={styles.red_button}
@@ -64,6 +66,7 @@ const styles = StyleSheet.create({
     borderWidth: 4
   },
   red_button: {
+    position: "absolute",
     height: 70, 
     width: "55%", 
     flexDirection: "row",
@@ -71,6 +74,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: theme.magenta,
     borderRadius: 16,
-    marginTop: 375,
+    bottom: 35,
   },
 })

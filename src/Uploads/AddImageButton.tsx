@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    left: 165,
+    alignSelf: "center",
     top: -125,
     backgroundColor: theme.maroon2,
     alignItems: "center",

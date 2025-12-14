@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Toast from "react-native-toast-message";
 import theme from "./theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,10 +16,19 @@ export function SafeArea(props: SafeAreaProps) {
   );
 }
 
+export function Scroll({children}: {children: React.ReactNode}) {
+  return (
+    <ScrollView style={{ flex: 1, width: "100%" }}>
+      {children}
+    </ScrollView>
+  );
+}
+
 type HeaderProps = {
   text: string;
   isLoading?: boolean;
 }
+//last updated since, currentNumProcessingDocs, 
 export function Header(props: HeaderProps) {
   return (
     <View style={GlobalStyles.header}>
@@ -50,6 +59,7 @@ export const GlobalStyles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
+    alignSelf: "center",
     width: "90%",
     marginTop: 25,
     padding: 30,
@@ -63,6 +73,7 @@ export const GlobalStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   big_button: {
+    position: "absolute",
     height: 70, 
     width: "70%", 
     borderWidth: 4, 

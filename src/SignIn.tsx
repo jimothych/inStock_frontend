@@ -42,6 +42,9 @@ export default function SignIn() {
         name: "DEMO",
         email: "instock@instock.com",
         id: "102674853057286251419",
+        receiptsList: null,
+        currentNumProcessingDocs: 0,
+        isGlobalLoading: false,
       };
       navigateToMain(user);
       return;
@@ -82,7 +85,7 @@ export default function SignIn() {
       
       </Image>
       <Pressable 
-        style={[GlobalStyles.big_button, { marginTop: 500 }]}
+        style={[GlobalStyles.big_button, { bottom: "25%" }]}
         onPress={() => handleGoogleSignIn(false)}
       >
         <Image
@@ -95,7 +98,7 @@ export default function SignIn() {
       </Pressable>
 
       <Pressable 
-        style={[GlobalStyles.big_button, { marginTop: 20 }]}
+        style={[GlobalStyles.big_button, { bottom: "14%" }]}
         onPress={() => handleGoogleSignIn(true)}
       >
         <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>
