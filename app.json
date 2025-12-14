@@ -19,10 +19,6 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.jimothych.instock"
     },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/favicon.png"
-    },
     "plugins": [
       [
         "expo-splash-screen",
