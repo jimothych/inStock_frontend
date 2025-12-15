@@ -63,6 +63,5 @@ export function mapPayload(payload: User): UserState {
     photo: photoURL ?? null,
     receiptsList: null,
     currentNumProcessingDocs: 0,
-    isGlobalLoading: false,
   };
 }

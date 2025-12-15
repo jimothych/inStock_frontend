@@ -1,31 +1,23 @@
-import React, { useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useCallback, useContext } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import theme from "../global/theme";
 import { GlobalStyles } from "../global/global";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FlashList } from '@shopify/flash-list';
-import { api } from "../redux/apiSlice";
 import type { Receipt } from "../redux/apiSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { MainContext } from "../global/MainContext";
 import { RootState } from "../redux/store";
+import { deleteReceipt } from "../redux/userSlice";
+import { useDeleteReceiptItemMutation } from "../redux/apiSlice";
 
-export default function ReceiptsFlashList() {
-  const dispatch = useDispatch();
-  const receipts = useSelector((state: RootState) => state.user.receiptsList); //changes w/ redux store
-  const isGlobalLoading = useSelector((state: RootState) => state.user.isGlobalLoading);
+export default function ReceiptsFlashList(){
+  const context = useContext(MainContext);
+  const userSlice = useSelector((state: RootState) => state.user);
 
-  //1. scroll up
-  //2. call onRefresh, invalidates cache
-  //3. rtk queries in Main are triggered to call again
-  //4. the useEffects in Main catch the current isGlobalLoading state
-  //5. receiptsList and currentNumProcessingDocuments update accordingly
-  //6. isGlobalLoading state back to false because queries completed
-  const onRefresh = useCallback(() => {
-    dispatch(api.util.invalidateTags(["Receipts", "CurrentNumProcessingDocs"]));
-  }, [dispatch]);
-
-  if (!receipts || receipts.length === 0) {
-    return (
+  let content = null;
+  if (!userSlice.receiptsList || userSlice.receiptsList.length === 0) {
+    content = (
       <Text style={[GlobalStyles.italic, styles.none]}>
         Start uploading receipts to see analytics!
       </Text>
@@ -33,18 +25,46 @@ export default function ReceiptsFlashList() {
   }
 
   return (
-    <FlashList<Receipt>
-      data={receipts}
-      keyExtractor={(_, index) => index.toString()}
-      renderItem={({ item }) => <ReceiptRow receipt={item} />}
-      style={{ flex: 1, width: "100%" }}
-      onRefresh={onRefresh}
-      refreshing={isGlobalLoading}
-    />
+    <>
+      <FlashList<Receipt>
+        data={userSlice.receiptsList}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => <ReceiptRow receipt={item} />}
+        style={{ flex: 1, width: "100%" }}
+        onRefresh={context?.onRefresh}
+        refreshing={context?.isLoading}
+      />
+      {content}
+    </>
   );
 }
 
 function ReceiptRow({receipt}: {receipt: Receipt}) {
+  const dispatch = useDispatch();
+  const [deleteReceiptItem] = useDeleteReceiptItemMutation();
+
+  const description = `${receipt.unit_description} | Price per: $${receipt.price} | Quantity: ${receipt.quantity}`;
+
+  function del() {
+    console.log(`fire-and-forget deleting ${receipt.receipt_id}`)
+    dispatch(deleteReceipt(receipt.receipt_id));
+    deleteReceiptItem(receipt.receipt_id);
+  }
+
+  function alertUser() {
+    Alert.alert(`Delete Receipt Item [${receipt.transaction_date_time}]`, description, [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('delete canceled'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK', 
+        onPress: del
+      },
+    ]);
+  }
+
   return (
     <View style={styles.parent}>
       <View style={styles.child1}>
@@ -58,12 +78,12 @@ function ReceiptRow({receipt}: {receipt: Receipt}) {
           ellipsizeMode="tail"
           style={[GlobalStyles.light_italic, { color: theme.white1 }]}
         >
-          {`${receipt.unit_description} ${receipt.price}`}
+          {description}
         </Text>
       </View>
 
       <View style={styles.child3}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={alertUser}>
           <Ionicons name="trash" color={theme.grey1} size={22} />
         </TouchableOpacity>
       </View>

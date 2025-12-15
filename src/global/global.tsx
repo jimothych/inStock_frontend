@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Toast from "react-native-toast-message";
 import theme from "./theme";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { ProgressBar } from 'react-native-paper';
+import { MainContext } from "./MainContext";
 
 type SafeAreaProps = {
   children: React.ReactNode;
@@ -28,13 +32,37 @@ type HeaderProps = {
   text: string;
   isLoading?: boolean;
 }
-//last updated since, currentNumProcessingDocs, 
+
 export function Header(props: HeaderProps) {
+  const context = useContext(MainContext)
+  const userSlice = useSelector((state: RootState) => state.user);
+  const [loadingBarVisible, setLoadingBarVisible] = useState(false);
+
+  useEffect(() => {
+    if(userSlice.currentNumProcessingDocs || context?.isLoading) {
+      setLoadingBarVisible(true);
+    } else {
+      setLoadingBarVisible(false);
+    }
+  }, [userSlice]);
+
   return (
     <View style={GlobalStyles.header}>
       <Text style={[GlobalStyles.bold, {color: theme.white3}]}>
         {props.text}
       </Text>
+
+      <Text style={[GlobalStyles.light_italic, {color: theme.white2, paddingTop: 3}]}>
+        {`Last Updated: ${context?.currentTime}  |  Currently Processing: ${userSlice.currentNumProcessingDocs} Files`}
+      </Text>
+
+      <View style={GlobalStyles.loadingBar}>
+        <ProgressBar 
+          color={theme.maroon1} 
+          visible={loadingBarVisible} 
+          indeterminate={true} 
+        />
+      </View>
     </View>
   );
 }
@@ -65,8 +93,13 @@ export const GlobalStyles = StyleSheet.create({
     padding: 30,
     borderRadius: 8,
   },
+  loadingBar: {
+    height: 4, 
+    width: '100%', 
+    marginTop: 10,
+  },
   header: {
-    height: 35,
+    height: 60,
     width: "100%",
     flexDirection: 'column',
     alignItems: 'center',

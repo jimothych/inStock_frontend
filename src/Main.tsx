@@ -1,23 +1,24 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Uploads from "./Uploads/Uploads";
-import Analytics from "./Analytics/Analytics";
-import Profile from "./Profile/Profile";
+import RecentReceipts from "./RecentReceipts/RecentReceipts";
+import Inventory from "./Inventory/Inventory";
+import SettingsPage from "./SettingsPage/SettingsPage";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import theme from "./global/theme";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, StackActions } from "@react-navigation/native";
-import type { Receipt } from "./redux/apiSlice";
 import { useGetUserReceiptsQuery, useGetCurrentNumProcessingDocsQuery } from "./redux/apiSlice";
-import { clearUser, setCurrentNumProcessingDocs, setReceiptsList, setIsGlobalLoading } from "./redux/userSlice";
+import { clearUser, setCurrentNumProcessingDocs, setReceiptsList } from "./redux/userSlice";
 import { RootState } from "./redux/store";
 import Toast from "react-native-toast-message";
+import { DateTime } from "luxon";
+import { MainContext } from "./global/MainContext";
 
 type MainTabParamList = {
-  Upload: undefined;
-  Analytics: undefined;
-  Profile: undefined;
+  RecentReceipts: undefined;
+  Inventory: undefined;
+  SettingsPage: undefined;
 };
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -26,42 +27,78 @@ export default function Main() {
   const userSlice = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  //useState w/ loadingModalVisible
+  const [currentTime, setCurrentTime] = useState<string>('_');
+
+  //isLoading - When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
+  //isFetching - When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
+  //https://redux-toolkit.js.org/rtk-query/usage/queries#frequently-used-query-hook-return-values
 
   const { data: receiptsData, //undefined while loading
           error: receiptsError, 
-          isLoading: receiptsIsLoading 
-        } = useGetUserReceiptsQuery(userSlice.id!, {
-    skip: !userSlice.id,
-  });
+          isLoading: receiptsIsLoading, //does not fire after init
+          isFetching: receiptsIsFetching,
+          refetch: refetchReceipts,
+        } = useGetUserReceiptsQuery(userSlice.id!);
 
   const { data: currentNumProcessingDocsData, //undefined while loading
           error: currentNumProcessingDocsError, 
-          isLoading: currentNumProcessingDocsLoading 
-        } = useGetCurrentNumProcessingDocsQuery(userSlice.id!, {
-    skip: !userSlice.id,
-  });
+          isLoading: currentNumProcessingDocsLoading, //does not fire after init
+          isFetching: currentNumProcessingDocsIsFetching,
+          refetch: refetchNumProcessing,
+        } = useGetCurrentNumProcessingDocsQuery(userSlice.id!);
 
-  //nature of rtk query: we invalidate all caches in children, queries are called again here, then redux store updated
+  //handleRefresh passed into Main.Context
+  const handleRefresh = useCallback(() => {
+    refetchReceipts();
+    refetchNumProcessing();
+  }, [refetchReceipts, refetchNumProcessing]);
+
   useEffect(() => { //dispatches will not execute while data is undefined (isLoading state = true)
-    if(currentNumProcessingDocsData) { 
-      dispatch(setCurrentNumProcessingDocs(currentNumProcessingDocsData)); 
+    //https://moment.github.io/luxon/#/formatting?id=tolocalestring-strings-for-humans
+
+    if(currentNumProcessingDocsData != undefined) { //watch out for falsy 0
+      dispatch(setCurrentNumProcessingDocs(currentNumProcessingDocsData));
+      console.log(`\tMOUNTED & FETCHED, currentNumProcessingDocsData now CACHED`);
     }
     if(receiptsData) { 
       dispatch(setReceiptsList(receiptsData)); 
+      console.log(`\tMOUNTED & FETCHED, receiptsData now CACHED`);
     }
   }, [receiptsData, currentNumProcessingDocsData]); //update redux store only when fetched data changes state
 
-  //isGlobalLoading state is OR truth table
-  //rtk query useQuery and useMutation re-render component per request
+  //isLoading state is OR truth table, passed into Main.Context
+  const isLoading = receiptsIsLoading || 
+                  currentNumProcessingDocsLoading ||
+                  receiptsIsFetching || 
+                  currentNumProcessingDocsIsFetching;
+
   useEffect(() => {
-    dispatch(setIsGlobalLoading(receiptsIsLoading || currentNumProcessingDocsLoading));
-  }, [receiptsIsLoading, currentNumProcessingDocsLoading]);
+    if (receiptsIsFetching || 
+        currentNumProcessingDocsIsFetching ||
+        (!receiptsData && currentNumProcessingDocsData === undefined)) {
+      return;
+    }
 
-  if(receiptsError || currentNumProcessingDocsError) { SignOut(); } //jank but works
+    const dt = DateTime.now();
+    const now = dt.toLocaleString(DateTime.TIME_WITH_SECONDS);
+    setCurrentTime(now); //sending to Main.Context
 
-  function SignOut() {
-    GoogleSignin.signOut();
+    const wasCached = (userSlice.receiptsList === receiptsData) &&
+                      (userSlice.currentNumProcessingDocs === currentNumProcessingDocsData);
+
+    console.log(`Main.tsx triggered at ${now} - using ${wasCached ? 'cached data to prevent re-rendering' : 'fresh data'}`);
+  }, [receiptsIsFetching, currentNumProcessingDocsIsFetching, receiptsData, currentNumProcessingDocsData, userSlice]);
+
+  useEffect(function handleErrors() {
+    if (receiptsError || currentNumProcessingDocsError) { 
+      console.error(`receiptsError: ${JSON.stringify(receiptsError)}`);
+      console.error(`currentNumProcessingDocsError: ${JSON.stringify(currentNumProcessingDocsError)}`)
+      SignOut(); 
+    }
+  }, [receiptsError, currentNumProcessingDocsError]);
+
+  async function SignOut() {
+    await GoogleSignin.signOut();
     dispatch(clearUser());
     navigation.dispatch(StackActions.replace('SignIn'));
     console.log(`signed out | ${JSON.stringify(userSlice)}`);
@@ -75,8 +112,15 @@ export default function Main() {
 
   //.Screen route options: https://reactnavigation.org/docs/screen/#options
   return (
+    <MainContext.Provider 
+      value={{ 
+        onRefresh: handleRefresh,
+        isLoading: isLoading,
+        currentTime: currentTime,
+      }}
+    >
     <Tab.Navigator 
-      initialRouteName="Upload" 
+      initialRouteName="RecentReceipts" 
       screenOptions={{ 
         headerShown: false,
         tabBarIconStyle: { marginTop: 5 },
@@ -91,35 +135,36 @@ export default function Main() {
       }}
     >
       <Tab.Screen 
-        name="Upload" 
-        component={Uploads}
+        name="RecentReceipts" 
+        component={RecentReceipts}
         options={{
-          title: "Upload",
+          title: "Recent Receipts",
           tabBarIcon: ({ color }) => (
             <Ionicons name="folder-outline" color={color} size={30} />
           ),
         }}
       />
       <Tab.Screen 
-        name="Analytics"
-        component={Analytics}
+        name="Inventory"
+        component={Inventory}
         options={{
-          title: "Analytics",
+          title: "Inventory",
           tabBarIcon: ({ color }) => (
             <Ionicons name="analytics-outline" color={color} size={30} />
           ),
         }}
       />
       <Tab.Screen 
-        name="Profile"
-        component={Profile}
+        name="SettingsPage"
+        component={SettingsPage}
         options={{
-          title: "Profile",
+          title: "SettingsPage",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-circle-outline" color={color} size={30} />
           ),
         }}
       />
     </Tab.Navigator>    
+    </MainContext.Provider>
   );
 }

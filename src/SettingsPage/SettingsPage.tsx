@@ -7,10 +7,10 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useNavigation, StackActions } from "@react-navigation/native";
 import { RootState } from "../redux/store";
 import theme from "../global/theme";
-import { GlobalStyles, SafeArea, Scroll } from "../global/global";
+import { GlobalStyles, Header, SafeArea, Scroll } from "../global/global";
 import Toast from "react-native-toast-message";
 
-export default function Profile() {
+export default function SettingsPage() {
   const userSlice = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -29,6 +29,7 @@ export default function Profile() {
 
   return (
     <SafeArea backgroundColor={theme.purple2}>
+      <Header text="Settings" />
       <Scroll>
       <View style={[GlobalStyles.container_card, { backgroundColor: theme.white2, marginTop: 10 }]}>
         <Image

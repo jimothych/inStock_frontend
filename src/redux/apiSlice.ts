@@ -13,8 +13,7 @@ export type Receipt = {
 
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.BACKEND_URL }),
-  tagTypes: ['Receipts', 'CurrentNumProcessingDocs'],
+  baseQuery: fetchBaseQuery({ baseUrl: "https://in-stoc-evg9e3bpf8dnakad.northcentralus-01.azurewebsites.net" }),
   endpoints: (builder) => ({
 
     //not really using the cache per se, just handy for state refetch after deletePost
@@ -22,25 +21,22 @@ export const api = createApi({
 
     getUserReceipts: builder.query<Receipt[], string>({
       query: (userID) => `user/receipts/${userID}`,
-      providesTags: ['Receipts'],
     }),
 
     getCurrentNumProcessingDocs: builder.query<number, string>({
       query: (userID) => `user/currentNumProcessingDocs/${userID}`,
-      providesTags: ['CurrentNumProcessingDocs'],
     }),
 
-    deletePost: builder.mutation<number, number>({
+    deleteReceiptItem: builder.mutation<number, string>({
       query(receipt_id) {
         return {
           url: `receipt/${receipt_id}`,
           method: 'DELETE',
         }
       },
-      invalidatesTags: ['Receipts'],
     }),
 
-    uploadFiles: builder.mutation<number, { userID: number; files: FormData }>({
+    uploadFiles: builder.mutation<number, { userID: string; files: FormData }>({
       query({ userID, files }) {
         return {
           url: `upload/${userID}`,
@@ -55,5 +51,5 @@ export const api = createApi({
 
 export const { useGetUserReceiptsQuery,
               useGetCurrentNumProcessingDocsQuery,
-              useDeletePostMutation,
+              useDeleteReceiptItemMutation,
               useUploadFilesMutation } = api

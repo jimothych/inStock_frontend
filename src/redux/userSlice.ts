@@ -8,7 +8,6 @@ export type UserState = {
   id: string | null;
   receiptsList: Receipt[] | null;
   currentNumProcessingDocs: number;
-  isGlobalLoading: boolean;
 }
 
 const initialState: UserState = {
@@ -18,7 +17,6 @@ const initialState: UserState = {
   id: null,
   receiptsList: null,
   currentNumProcessingDocs: 0,
-  isGlobalLoading: false,
 };
 
 const userSlice = createSlice({
@@ -34,14 +32,22 @@ const userSlice = createSlice({
     setReceiptsList(state, action: PayloadAction<Receipt[] | null>) {
       state.receiptsList = action.payload;
     },
-    setIsGlobalLoading(state, action: PayloadAction<boolean>) {
-      state.isGlobalLoading = action.payload;
-    },
     clearUser() {
       return initialState;
+    },
+    //string in payload is receipt_id
+    deleteReceipt(state, action: PayloadAction<string>) {
+      if (!state.receiptsList) return; // guard clause
+      state.receiptsList = state.receiptsList.filter( //make new array
+        receipt => receipt.receipt_id !== action.payload
+      );
     },
   },
 });
 
-export const { setUser, clearUser, setCurrentNumProcessingDocs, setReceiptsList, setIsGlobalLoading } = userSlice.actions;
+export const { setUser, 
+              clearUser, 
+              setCurrentNumProcessingDocs, 
+              setReceiptsList,
+              deleteReceipt } = userSlice.actions;
 export default userSlice.reducer;

@@ -44,7 +44,6 @@ export default function SignIn() {
         id: "102674853057286251419",
         receiptsList: null,
         currentNumProcessingDocs: 0,
-        isGlobalLoading: false,
       };
       navigateToMain(user);
       return;
