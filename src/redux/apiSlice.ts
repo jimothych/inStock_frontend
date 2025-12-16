@@ -36,12 +36,12 @@ export const api = createApi({
       },
     }),
 
-    uploadFiles: builder.mutation<number, { userID: string; files: FormData }>({
-      query({ userID, files }) {
+    uploadFiles: builder.mutation<number, { userID: string; formData: FormData }>({
+      query({ userID, formData }) {
         return {
           url: `upload/${userID}`,
           method: 'POST',
-          body: files,
+          body: formData,
         }
       },
     }),

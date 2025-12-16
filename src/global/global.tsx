@@ -71,6 +71,10 @@ export function showDefaultToast() {
   });
 }
 
+export function ensureError(e: unknown): Error {
+  return e instanceof Error ? e : new Error(String(e));
+}
+
 export const GlobalStyles = StyleSheet.create({
   container_column: {
     flex: 1,

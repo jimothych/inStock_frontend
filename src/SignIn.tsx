@@ -29,7 +29,7 @@ export default function SignIn() {
         } else if (isNoSavedCredentialFoundResponse(response)) {
           //do nothing
         }
-      } catch (error) { console.log(error) }
+      } catch (error) { console.error(error) }
     };
 
     getStoredSignIn();
@@ -60,7 +60,7 @@ export default function SignIn() {
       const user = mapPayload(payload);
       navigateToMain(user);
     } catch (error: unknown) {
-      console.log(error); //do nothing
+      console.error(error); //do nothing
     }
   }
 
