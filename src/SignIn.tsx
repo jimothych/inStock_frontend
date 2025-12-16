@@ -84,7 +84,7 @@ export default function SignIn() {
       
       </Image>
       <Pressable 
-        style={[GlobalStyles.big_button, { bottom: "25%" }]}
+        style={[styles.big_button, { bottom: "25%" }]}
         onPress={() => handleGoogleSignIn(false)}
       >
         <Image
@@ -97,7 +97,7 @@ export default function SignIn() {
       </Pressable>
 
       <Pressable 
-        style={[GlobalStyles.big_button, { bottom: "14%" }]}
+        style={[styles.big_button, { bottom: "14%" }]}
         onPress={() => handleGoogleSignIn(true)}
       >
         <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>
@@ -119,5 +119,17 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     left: 20
-  }
+  },
+  big_button: {
+    position: "absolute",
+    height: 70, 
+    width: "70%", 
+    borderWidth: 4, 
+    borderColor: theme.white2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.white,
+    borderRadius: 16,
+  },
 })

@@ -30,7 +30,7 @@ export const api = createApi({
     deleteReceiptItem: builder.mutation<number, string>({
       query(receipt_id) {
         return {
-          url: `receipt/${receipt_id}`,
+          url: `user/receipt/${receipt_id}`,
           method: 'DELETE',
         }
       },

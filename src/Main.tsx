@@ -109,7 +109,7 @@ export default function Main() {
       type: 'error',
       text1: "SIGNED OUT",
       text2: "ERROR - PLEASE CONTACT SUPPORT",
-      visibilityTime: 2000,
+      visibilityTime: 4000,
     });
   }
 

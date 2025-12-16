@@ -25,7 +25,10 @@ export default function AddImageButton() {
       allowsMultipleSelection: true,
       quality: 1,
     });
-    if(result.canceled) return;
+    if(result.canceled) {
+      console.log("dismissed photo library");
+      return;
+    }
 
     const files: ImagePicker.ImagePickerAsset[] = result.assets;
     setImagePickerAssets(files);

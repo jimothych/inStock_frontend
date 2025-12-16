@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Text, StyleSheet, Pressable } from 'react-native';
 import type { Dispatch, SetStateAction } from "react";
 import { useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import { GlobalStyles, ensureError } from "../global/global";
 import Toast from "react-native-toast-message";
 import { ActivityIndicator } from 'react-native-paper';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { MainContext } from "../global/MainContext";
 
 type ImageModalProps = {
   setModalVisible: Dispatch<SetStateAction<boolean>>;
@@ -20,6 +21,7 @@ type ImageModalProps = {
 //also will handle Toasts after error or success
 //render a spinner w/ hang tight text while loading
 export default function UploadFilesComponent({ setModalVisible, imagePickerAssets }: ImageModalProps) {
+  const context = useContext(MainContext);
   const userSlice = useSelector((state: RootState) => state.user);
   const [uploadFiles] = useUploadFilesMutation();
   const [isUploading, setIsUploading] = useState(false);
@@ -47,7 +49,7 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
       
       const renderedImage = await context.renderAsync();
       const saved = await renderedImage.saveAsync({
-        compress: 0.3,
+        compress: 1, //no compression to help out azure doc intelligence
         format: ImageManipulator.SaveFormat.JPEG,
       });
       
@@ -65,21 +67,26 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
   }
 
   function handleModalExit(error?: Error) {
-    if(error) { console.error(`image modal exited w/ e | ${error.message}`); }
+    if(error) { 
+      console.error(`image modal exited w/ e | ${error.message}`); 
+    } else {
+      console.log(`exited ImageModal.tsx`);
+    }
     setIsUploading(false); //maybe not necessary
     setModalVisible(false);
+    context?.onRefresh(); //call rtk query refresh
 
     if(error) {
       Toast.show({
         type: 'error',
-        text1: "Error",
+        text1: "ERROR",
         text2: `Upload failed, please try again | ${error.message}`,
         visibilityTime: 4000,
       });
     } else {
       Toast.show({
         type: "success",
-        text1: "Success!",
+        text1: "SUCCESS!",
         text2: `Successfully uploaded ${imagePickerAssets.length} files`,
         visibilityTime: 4000,
       });
@@ -90,13 +97,13 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
   if(isUploading) {
     content = (
       <>
-        <Text style={[GlobalStyles.bold, {color: theme.white3}]}>
+        <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>
           Hang tight! Uploading files...
         </Text>
         <ActivityIndicator 
           animating={true} 
-          color={theme.cyan} 
-          size="small"
+          color={theme.maroon3} 
+          size={100}
         />
       </>
     )
@@ -104,7 +111,7 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
     content = (
       <>
       <Pressable 
-      style={styles.uploadButton}
+      style={[styles.button, styles.upload]}
       onPress={async() => await handleFileUploads()}
       >
         <Text style={[GlobalStyles.bold, {color: theme.white3}]}>
@@ -113,10 +120,17 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
       </Pressable>
 
       <Pressable 
-        style={styles.cancelButton}
-        onPress={() => setModalVisible(false)}
+        style={[styles.button, styles.cancel]}
+        onPress={() => {
+          Toast.show({
+            type: "info",
+            text1: "CANCELLED IMAGE UPLOAD",
+            visibilityTime: 4000,
+          });
+          setModalVisible(false)
+        }}
       >
-        <Text style={[GlobalStyles.bold, {color: theme.white3}]}>
+        <Text style={[GlobalStyles.bold, {color: theme.purple2}]}>
           CANCEL
         </Text>
       </Pressable>
@@ -128,24 +142,20 @@ export default function UploadFilesComponent({ setModalVisible, imagePickerAsset
 }
 
 const styles = StyleSheet.create({
-  uploadButton: {
-    height: 70, 
-    width: "55%", 
+  button: {
+    height: "10%", 
+    width: "75%", 
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.magenta,
-    borderRadius: 16,
-    bottom: 35,
+    borderRadius: 12,
   },
-  cancelButton: {
-    height: 70, 
-    width: "55%", 
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.magenta,
-    borderRadius: 16,
-    bottom: 35,
+  upload: {
+    backgroundColor: theme.maroon2,
+  },
+  cancel: {
+    borderWidth: 3,
+    borderColor: theme.white3,
+    backgroundColor: theme.white,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Text, StyleSheet, Modal, View, Image, Pressable } from 'react-native';
 import Carousel, { ICarouselInstance, Pagination } from "react-native-reanimated-carousel";
@@ -27,6 +27,15 @@ export default function ImageModal({ modalVisible, setModalVisible, imagePickerA
     [imagePickerAssets.length]
   );
 
+  const [carouselDimensions, setCarouselDimensions] = useState({ width: 350, height: 500 });
+  const handleLayout = (event: any) => {
+    const { width, height } = event.nativeEvent.layout;
+    setCarouselDimensions({
+      width: width * 0.9,
+      height: height * 0.7
+    });
+  };
+
   return (
     <Modal 
       animationType="none" 
@@ -34,13 +43,13 @@ export default function ImageModal({ modalVisible, setModalVisible, imagePickerA
       visible={modalVisible}
     >
       <View style={styles.modalBackdrop}> 
-        <View style={styles.modalContent}>
+        <View style={styles.modalContent} onLayout={handleLayout}>
         <Carousel
           ref={ref}
           style={styles.carouselContainer}
           data={data}
-          width={350}
-          height={500}
+          width={carouselDimensions.width}
+          height={carouselDimensions.height}
           onProgressChange={progress}
           renderItem={({ index }) => (
             <View key={index} style={styles.imageContainer}>
@@ -61,15 +70,15 @@ export default function ImageModal({ modalVisible, setModalVisible, imagePickerA
           data={data}
           dotStyle={styles.dotStyle}
           activeDotStyle={styles.activeDotStyle}
-          containerStyle={{ gap: 7, marginTop: 15 }}
+          containerStyle={{ gap: 7, marginBottom: "5%", marginTop: 5 }}
           onPress={onPressPagination}
         />
-      </View>
 
-      <UploadFilesComponent 
-        imagePickerAssets={imagePickerAssets} 
-        setModalVisible={setModalVisible}
-      />
+        <UploadFilesComponent 
+          imagePickerAssets={imagePickerAssets} 
+          setModalVisible={setModalVisible}
+        />
+      </View>
     </View>
     </Modal>
   );
@@ -86,7 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.white2,
     width: "90%",
     height: "80%",
-    justifyContent: "center",
+    justifyContent: "space-evenly",
     alignItems: "center",
     borderRadius: 10,
     padding: 20,
@@ -107,7 +116,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dotStyle: {
-    width: 25,
+    width: 20,
 		height: 4,
     backgroundColor: theme.purple2
   },

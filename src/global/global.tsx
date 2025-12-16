@@ -65,7 +65,7 @@ export function Header(props: HeaderProps) {
 export function showDefaultToast() {
   Toast.show({
     type: 'error',
-    text1: "Error",
+    text1: "ERROR",
     text2: "Please Contact Support",
     visibilityTime: 4000,
   });
@@ -103,18 +103,6 @@ export const GlobalStyles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  big_button: {
-    position: "absolute",
-    height: 70, 
-    width: "70%", 
-    borderWidth: 4, 
-    borderColor: theme.white2,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.white,
-    borderRadius: 16,
   },
   bold: {
     fontFamily: 'Inter_28pt-Bold',

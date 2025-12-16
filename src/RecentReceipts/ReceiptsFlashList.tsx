@@ -49,7 +49,9 @@ function ReceiptRow({receipt}: {receipt: Receipt}) {
   const dispatch = useDispatch();
   const [deleteReceiptItem] = useDeleteReceiptItemMutation();
 
-  const description = `${receipt.unit_description} | Price per: $${receipt.price} | Quantity: ${receipt.quantity}`;
+  const quantity = receipt.quantity ?? 1;
+
+  const description = `${receipt.unit_description} | Price: $${receipt.price} | Quantity: ${quantity}`;
 
   function del() {
     console.log(`fire-and-forget deleting ${receipt.receipt_id}`)
@@ -135,12 +137,25 @@ const styles = StyleSheet.create({
 
 function sortByTransactionDate(arr: Receipt[]): Receipt[] {
   return [...arr].sort((a, b) => {
-    const dateA = DateTime.fromFormat(a.transaction_date_time!, 'MM-dd-yyyy');
-    const dateB = DateTime.fromFormat(b.transaction_date_time!, 'MM-dd-yyyy');
-    
-    if (!dateA.isValid) console.log('Invalid dateA:', a.transaction_date_time);
-    if (!dateB.isValid) console.log('Invalid dateB:', b.transaction_date_time);
+    let dateA = validateDate(a.transaction_date_time!);
+    let dateB = validateDate(b.transaction_date_time!);
+
+    if (!dateA.isValid) {
+      console.warn(`invalid dateA: ${a.transaction_date_time}`);
+    }
+    if (!dateB.isValid) {
+      console.warn(`invalid dateB: ${b.transaction_date_time}`);
+    }
     
     return dateB.toMillis() - dateA.toMillis();  //newest first
   });
+}
+
+function validateDate(str: string): DateTime {
+  let dt = DateTime.fromFormat(str, 'MM-dd-yyyy');
+  if (!dt.isValid) {
+    dt = DateTime.fromFormat(str, 'yyyy-MM-dd');
+  }
+  
+  return dt;
 }
