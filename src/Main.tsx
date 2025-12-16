@@ -53,6 +53,7 @@ export default function Main() {
     refetchNumProcessing();
   }, [refetchReceipts, refetchNumProcessing]);
 
+  //HANDLE DATA QUERY STATE
   useEffect(() => { //dispatches will not execute while data is undefined (isLoading state = true)
     //https://moment.github.io/luxon/#/formatting?id=tolocalestring-strings-for-humans
 
@@ -72,6 +73,7 @@ export default function Main() {
                   receiptsIsFetching || 
                   currentNumProcessingDocsIsFetching;
 
+  //CHECK isFETCHING STATUS & CACHE, PASS CURRENT TIME TO CONTEXT
   useEffect(() => {
     if (receiptsIsFetching || 
         currentNumProcessingDocsIsFetching ||
@@ -89,19 +91,20 @@ export default function Main() {
     console.log(`Main.tsx triggered at ${now} - using ${wasCached ? 'cached data to prevent re-rendering' : 'fresh data'}`);
   }, [receiptsIsFetching, currentNumProcessingDocsIsFetching, receiptsData, currentNumProcessingDocsData, userSlice]);
 
+  //HANDLE ERROR QUERY STATE
   useEffect(function handleErrors() {
     if (receiptsError || currentNumProcessingDocsError) { 
       console.error(`receiptsError: ${JSON.stringify(receiptsError)}`);
       console.error(`currentNumProcessingDocsError: ${JSON.stringify(currentNumProcessingDocsError)}`)
-      SignOut(); 
+      signOutOnError(); 
     }
   }, [receiptsError, currentNumProcessingDocsError]);
 
-  async function SignOut() {
+  async function signOutOnError() {
     await GoogleSignin.signOut();
     dispatch(clearUser());
     navigation.dispatch(StackActions.replace('SignIn'));
-    console.log(`signed out | ${JSON.stringify(userSlice)}`);
+    console.log(`signed out | ${JSON.stringify(userSlice.id)}`);
     Toast.show({
       type: 'error',
       text1: "SIGNED OUT",

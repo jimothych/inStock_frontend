@@ -36,15 +36,10 @@ type HeaderProps = {
 export function Header(props: HeaderProps) {
   const context = useContext(MainContext)
   const userSlice = useSelector((state: RootState) => state.user);
-  const [loadingBarVisible, setLoadingBarVisible] = useState(false);
 
-  useEffect(() => {
-    if(userSlice.currentNumProcessingDocs || context?.isLoading) {
-      setLoadingBarVisible(true);
-    } else {
-      setLoadingBarVisible(false);
-    }
-  }, [userSlice]);
+  // !! is js boolean conversion
+  //useEffect not needed here because loading is derivative of state and not a side-effect
+  const loadingBarVisible = !!userSlice.currentNumProcessingDocs || !!context?.isLoading;
 
   return (
     <View style={GlobalStyles.header}>

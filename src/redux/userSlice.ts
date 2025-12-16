@@ -35,7 +35,6 @@ const userSlice = createSlice({
     clearUser() {
       return initialState;
     },
-    //string in payload is receipt_id
     deleteReceipt(state, action: PayloadAction<string>) {
       if (!state.receiptsList) return; // guard clause
       state.receiptsList = state.receiptsList.filter( //make new array

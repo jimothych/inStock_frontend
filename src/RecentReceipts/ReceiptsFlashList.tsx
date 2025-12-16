@@ -10,31 +10,37 @@ import { MainContext } from "../global/MainContext";
 import { RootState } from "../redux/store";
 import { deleteReceipt } from "../redux/userSlice";
 import { useDeleteReceiptItemMutation } from "../redux/apiSlice";
+import { DateTime } from "luxon";
 
 export default function ReceiptsFlashList(){
   const context = useContext(MainContext);
   const userSlice = useSelector((state: RootState) => state.user);
 
-  let content = null;
-  if (!userSlice.receiptsList || userSlice.receiptsList.length === 0) {
-    content = (
-      <Text style={[GlobalStyles.italic, styles.none]}>
-        Start uploading receipts to see analytics!
-      </Text>
-    );
-  }
+  const dataValid: boolean = !!userSlice.receiptsList && 
+                            userSlice.receiptsList.length > 0;
+
+  const data = dataValid ? 
+              sortByTransactionDate(userSlice.receiptsList!) : 
+              [{ dummy: true } as any];
 
   return (
     <>
       <FlashList<Receipt>
-        data={userSlice.receiptsList}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item }) => <ReceiptRow receipt={item} />}
+        data={data}
+        keyExtractor={(item) => item.receipt_id}
+        renderItem={({ item }) =>
+          dataValid ? (
+            <ReceiptRow receipt={item} />
+          ) : (
+            <Text style={[GlobalStyles.italic, styles.none]}>
+              Start uploading receipts to see inventory analytics!
+            </Text>
+          )
+        }
         style={{ flex: 1, width: "100%" }}
         onRefresh={context?.onRefresh}
         refreshing={context?.isLoading}
       />
-      {content}
     </>
   );
 }
@@ -122,6 +128,19 @@ const styles = StyleSheet.create({
   },
   none: {
     color: theme.white3,
-    marginTop: 50,
+    marginTop: 150,
+    alignSelf: "center",
   }
 });
+
+function sortByTransactionDate(arr: Receipt[]): Receipt[] {
+  return [...arr].sort((a, b) => {
+    const dateA = DateTime.fromFormat(a.transaction_date_time!, 'MM-dd-yyyy');
+    const dateB = DateTime.fromFormat(b.transaction_date_time!, 'MM-dd-yyyy');
+    
+    if (!dateA.isValid) console.log('Invalid dateA:', a.transaction_date_time);
+    if (!dateB.isValid) console.log('Invalid dateB:', b.transaction_date_time);
+    
+    return dateB.toMillis() - dateA.toMillis();  //newest first
+  });
+}

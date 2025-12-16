@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +19,7 @@ export default function SettingsPage() {
     await GoogleSignin.signOut();
     dispatch(clearUser());
     navigation.dispatch(StackActions.replace('SignIn'));
-    console.log(`signed out | ${JSON.stringify(userSlice)}`);
+    console.log(`signed out | ${JSON.stringify(userSlice.id)}`);
     Toast.show({
       type: 'info',
       text1: "SIGNED OUT",
