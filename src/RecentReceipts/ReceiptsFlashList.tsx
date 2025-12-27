@@ -10,7 +10,6 @@ import { MainContext } from "../global/MainContext";
 import { RootState } from "../redux/store";
 import { deleteReceipt } from "../redux/userSlice";
 import { useDeleteReceiptItemMutation } from "../redux/apiSlice";
-import { DateTime } from "luxon";
 
 export default function ReceiptsFlashList(){
   const context = useContext(MainContext);
@@ -19,9 +18,7 @@ export default function ReceiptsFlashList(){
   const dataValid: boolean = !!userSlice.receiptsList && 
                             userSlice.receiptsList.length > 0;
 
-  const data = dataValid ? 
-              sortByTransactionDate(userSlice.receiptsList!) : 
-              [{ dummy: true } as any];
+  const data = dataValid ? userSlice.receiptsList : [{ dummy: true } as any];
 
   return (
     <>
@@ -49,9 +46,7 @@ function ReceiptRow({receipt}: {receipt: Receipt}) {
   const dispatch = useDispatch();
   const [deleteReceiptItem] = useDeleteReceiptItemMutation();
 
-  const quantity = receipt.quantity ?? 1;
-
-  const description = `${receipt.unit_description} | Price: $${receipt.price} | Quantity: ${quantity}`;
+  const description = `${receipt.unit_description} | Price: $${receipt.price} | Quantity: ${receipt.quantity}`;
 
   function del() {
     console.log(`fire-and-forget deleting ${receipt.receipt_id}`)
@@ -134,28 +129,3 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   }
 });
-
-function sortByTransactionDate(arr: Receipt[]): Receipt[] {
-  return [...arr].sort((a, b) => {
-    let dateA = validateDate(a.transaction_date_time!);
-    let dateB = validateDate(b.transaction_date_time!);
-
-    if (!dateA.isValid) {
-      console.warn(`invalid dateA: ${a.transaction_date_time}`);
-    }
-    if (!dateB.isValid) {
-      console.warn(`invalid dateB: ${b.transaction_date_time}`);
-    }
-    
-    return dateB.toMillis() - dateA.toMillis();  //newest first
-  });
-}
-
-function validateDate(str: string): DateTime {
-  let dt = DateTime.fromFormat(str, 'MM-dd-yyyy');
-  if (!dt.isValid) {
-    dt = DateTime.fromFormat(str, 'yyyy-MM-dd');
-  }
-  
-  return dt;
-}

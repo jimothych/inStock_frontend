@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import Toast from "react-native-toast-message";
 import theme from "./theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { ProgressBar } from 'react-native-paper';
 import { MainContext } from "./MainContext";
+import { DateTime } from "luxon";
+import type { Receipt } from "../redux/apiSlice";
 
 type SafeAreaProps = {
   children: React.ReactNode;
@@ -14,15 +16,29 @@ type SafeAreaProps = {
 };
 export function SafeArea(props: SafeAreaProps) {
   return (
-    <SafeAreaView style={[GlobalStyles.container_column, { backgroundColor: props.backgroundColor }]}>
+    <SafeAreaView 
+      edges={['right', 'top', 'left']} 
+      style={[GlobalStyles.container_column, { backgroundColor: props.backgroundColor }]}
+    >
       {props.children}
     </SafeAreaView>
   );
 }
 
 export function Scroll({children}: {children: React.ReactNode}) {
+  const context = useContext(MainContext);
+
   return (
-    <ScrollView style={{ flex: 1, width: "100%" }}>
+    <ScrollView 
+      style={{ flex: 1, width: "100%" }}
+      contentContainerStyle={{ alignItems: "center" }}
+      refreshControl={
+        <RefreshControl 
+          refreshing={context!.isLoading} 
+          onRefresh={context?.onRefresh} 
+        />
+      }
+    >
       {children}
     </ScrollView>
   );
@@ -32,7 +48,6 @@ type HeaderProps = {
   text: string;
   isLoading?: boolean;
 }
-
 export function Header(props: HeaderProps) {
   const context = useContext(MainContext)
   const userSlice = useSelector((state: RootState) => state.user);
@@ -62,17 +77,35 @@ export function Header(props: HeaderProps) {
   );
 }
 
-export function showDefaultToast() {
-  Toast.show({
-    type: 'error',
-    text1: "ERROR",
-    text2: "Please Contact Support",
-    visibilityTime: 4000,
-  });
-}
-
 export function ensureError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e));
+}
+
+export function validateDate(str: string): DateTime | null {
+  let dt = DateTime.fromFormat(str, 'MM-dd-yyyy');
+  if (!dt.isValid) {
+    dt = DateTime.fromFormat(str, 'yyyy-MM-dd');
+  }
+
+  if (!dt.isValid) {
+    console.warn(`invalid date: ${str}`);
+    return null;
+  }
+  
+  return dt;
+}
+
+export function sortByTransactionDate(arr: Receipt[]): Receipt[] {
+  return [...arr].sort((a, b) => {
+    let dateA = validateDate(a.transaction_date_time!);
+    let dateB = validateDate(b.transaction_date_time!);
+
+    if (!dateA && !dateB) return 0; //nothing happens
+    if (!dateA) return 1;   // a goes after b
+    if (!dateB) return -1;  // b goes after a
+
+    return dateB.toMillis() - dateA.toMillis();  //newest first
+  });
 }
 
 export const GlobalStyles = StyleSheet.create({
@@ -86,11 +119,13 @@ export const GlobalStyles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    alignSelf: "center",
-    width: "90%",
-    marginTop: 25,
+    //alignSelf: "center",
+    width: "92%",
+    marginTop: 6,
+    marginBottom: 6,
     padding: 30,
     borderRadius: 8,
+    backgroundColor: theme.white2,
   },
   loadingBar: {
     height: 4, 
@@ -106,7 +141,7 @@ export const GlobalStyles = StyleSheet.create({
   },
   bold: {
     fontFamily: 'Inter_28pt-Bold',
-    fontSize: 21
+    fontSize: 21,
   },
   r: {
     fontFamily: 'Inter_28pt-Regular',

@@ -5,5 +5,4 @@ type MainContextType = {
   isLoading: boolean;
   currentTime: string;
 };
-
 export const MainContext = createContext<MainContextType | null>(null);

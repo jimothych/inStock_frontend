@@ -14,6 +14,7 @@ import { RootState } from "./redux/store";
 import Toast from "react-native-toast-message";
 import { DateTime } from "luxon";
 import { MainContext } from "./global/MainContext";
+import { sortByTransactionDate } from "./global/global";
 
 type MainTabParamList = {
   RecentReceipts: undefined;
@@ -62,6 +63,7 @@ export default function Main() {
       console.log(`\tMOUNTED & FETCHED, currentNumProcessingDocsData now CACHED`);
     }
     if(receiptsData) { 
+      sortByTransactionDate(receiptsData); //synchronous in-place chronological sort
       dispatch(setReceiptsList(receiptsData)); 
       console.log(`\tMOUNTED & FETCHED, receiptsData now CACHED`);
     }
@@ -141,7 +143,7 @@ export default function Main() {
         name="RecentReceipts" 
         component={RecentReceipts}
         options={{
-          title: "Recent Receipts",
+          title: "Receipts",
           tabBarIcon: ({ color }) => (
             <Ionicons name="folder-outline" color={color} size={30} />
           ),
@@ -161,7 +163,7 @@ export default function Main() {
         name="SettingsPage"
         component={SettingsPage}
         options={{
-          title: "SettingsPage",
+          title: "Settings",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-circle-outline" color={color} size={30} />
           ),

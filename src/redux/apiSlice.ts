@@ -6,7 +6,7 @@ export type Receipt = {
   transaction_date_time: string | null;
   price: number | null;
   unit_description: string | null;
-  quantity: number | null;
+  quantity: number;
   product_code: string | null;
   user_id: string;
 }

@@ -31,15 +31,15 @@ export default function SettingsPage() {
     <SafeArea backgroundColor={theme.purple2}>
       <Header text="Settings" />
       <Scroll>
-      <View style={[GlobalStyles.container_card, { backgroundColor: theme.white2, marginTop: 10 }]}>
+      <View style={[GlobalStyles.container_card]}>
         <Image
           style={styles.profile_pic}
           source={userSlice.photo ? { uri: userSlice.photo } : require("@/assets/logo.png")}
         />
-        <Text style={[GlobalStyles.bold_italic, {color: theme.purple2}]}>
+        <Text style={[GlobalStyles.bold_italic]}>
           {userSlice.name}
         </Text>
-        <Text style={[GlobalStyles.light_italic, {color: theme.purple2}]}>
+        <Text style={[GlobalStyles.light_italic]}>
           {userSlice.email}
         </Text>
       </View>

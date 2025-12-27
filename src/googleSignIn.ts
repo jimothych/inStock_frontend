@@ -1,6 +1,5 @@
 import { GoogleSignin, statusCodes, isErrorWithCode, isSuccessResponse, User } from '@react-native-google-signin/google-signin';
 import Toast from 'react-native-toast-message';
-import { showDefaultToast } from './global/global';
 import { UserState } from './redux/userSlice';
 
 export async function GSignIn(): Promise<User> {
@@ -41,10 +40,10 @@ export async function GSignIn(): Promise<User> {
           });
           break;
         default:
-        //showDefaultToast(); //do nothing
+        //do nothing
       }
     } else { 
-      //showDefaultToast(); //do nothing
+      //do nothing
     }
     throw error;
   }
