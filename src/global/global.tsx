@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import Toast from "react-native-toast-message";
 import theme from "./theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
@@ -127,7 +126,7 @@ export const GlobalStyles = StyleSheet.create({
     width: "95%",
     marginTop: 6,
     marginBottom: 6,
-    padding: 30,
+    padding: 20,
     borderRadius: 8,
     backgroundColor: theme.white3,
   },

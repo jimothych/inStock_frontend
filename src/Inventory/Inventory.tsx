@@ -10,15 +10,15 @@ import type { Receipt } from "../redux/apiSlice";
 import ParametersPickers from "./ParametersPickers";
 import { DateTime, Interval } from "luxon";
 import { forecast, IntervalOption, intervalOptionPrinter } from "./calculations";
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-//Forecast
 //graph https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts
 const dummyParameters: Parameters = {
   label: "Hybrid Bike",
   lead_time: 1,
   target_in_stock_probability: .98,
   target_fill_rate: .95,
-  interval: IntervalOption.Month,
+  interval: IntervalOption.Week,
   holding_cost_per_unit: 1,
   backorder_cost_per_unit: 2,
 }
@@ -51,47 +51,66 @@ export default function Inventory() {
         setParameters={setParameters}
       />
 
-      <View style={[GlobalStyles.container_card]}>
-        <Text style={[GlobalStyles.bold]}>
-          Order Up-To
-        </Text>
-        <Text style={[GlobalStyles.bold, { fontSize: 55 }]}>
-          {`${forecastResults?.target_fill_S}`}
-        </Text>
-        <Text style={[GlobalStyles.light_italic]}>
+      <View style={[GlobalStyles.container_card, {alignItems: "flex-start", padding: 15}]}>
+
+        <View style={styles.row}>
+          <Ionicons name="cube" color={theme.maroon3} size={25} />
+          <Text style={[GlobalStyles.bold]}>
+            {" Order Up-To: "}
+          </Text>
+          <Text style={[GlobalStyles.bold, { color: theme.maroon3 }]}>
+            {`${forecastResults?.target_fill_S}`}
+          </Text>
+        </View>
+        <Text style={[GlobalStyles.light_italic, {fontSize: 10}]}>
           {`* ${parameters.target_fill_rate * 100}% certainty 1 ${intervalOptionPrinter(parameters.interval)} demand for ${parameters.label}`}
         </Text>
 
-        <Text style={[GlobalStyles.bold, { marginTop: 25 }]}>
-          {`${forecastResults?.target_lost_sales}`}
-        </Text>
-        <Text style={[GlobalStyles.light_italic]}>
-          *estimated quantity of lost sales
-        </Text>
-      </View>
-
-      <View style={[GlobalStyles.container_card]}>
-        <Text style={[GlobalStyles.bold]}>
-          Guarantee In Stock
-        </Text>
-        <Text style={[GlobalStyles.bold, { fontSize: 55 }]}>
-          {`${forecastResults?.target_in_stock_S}`}
-        </Text>
-        <Text style={[GlobalStyles.light_italic]}>
+        <View style={styles.row}>
+          <Ionicons name="cube" color={theme.maroon2} size={25} />
+          <Text style={[GlobalStyles.bold]}>
+            {" Guarantee In Stock: "}
+          </Text>
+          <Text style={[GlobalStyles.bold, { color: theme.maroon2 }]}>
+            {`${forecastResults?.target_in_stock_S}`}
+          </Text>
+        </View>
+        <Text style={[GlobalStyles.light_italic, {fontSize: 10}]}>
           {`* ${parameters.target_in_stock_probability * 100}% certainty 1 ${intervalOptionPrinter(parameters.interval)} demand for ${parameters.label}`}
         </Text>
-      </View>
 
-      <View style={[GlobalStyles.container_card]}>
-        <Text style={[GlobalStyles.bold]}>
-          Minimize Costs
-        </Text>
-        <Text style={[GlobalStyles.bold, { fontSize: 55 }]}>
-          {`${forecastResults?.minimize_holding_and_backorder_costs}`}
-        </Text>
-        <Text style={[GlobalStyles.light_italic]}>
+        <View style={styles.row}>
+          <Ionicons name="cube" color={theme.blue} size={25} />
+          <Text style={[GlobalStyles.bold]}>
+            {" Minimize Costs: "}
+          </Text>
+          <Text style={[GlobalStyles.bold, { color: theme.blue }]}>
+            {`${forecastResults?.minimize_holding_and_backorder_costs}`}
+          </Text>
+        </View>
+        <Text style={[GlobalStyles.light_italic, {fontSize: 10}]}>
           *based on holding & backorder costs
         </Text>
+
+        <View style={styles.row}>
+          <Ionicons name="cube" color={theme.grey1} size={25} />
+          <Text style={[GlobalStyles.bold]}>
+            {" Estimated Lost Sales: "}
+          </Text>
+          <Text style={[GlobalStyles.bold, { color: theme.grey1 }]}>
+            {`${forecastResults?.target_lost_sales}`}
+          </Text>
+        </View>
+        <Text style={[GlobalStyles.light_italic, {fontSize: 10, marginBottom: 15 }]}>
+          *estimated quantity of lost sales given target fill rate
+        </Text>
+
+        <Graph 
+          receipts={userSlice.receiptsList} 
+          parameters={parameters}
+          forecastResults={forecastResults}
+        />
+
       </View>
       </>
     );
@@ -112,6 +131,12 @@ const styles = StyleSheet.create({
     color: theme.white3,
     marginTop: 150,
     alignSelf: "center",
+  },
+  row: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
   }
 });
 

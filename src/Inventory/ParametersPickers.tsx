@@ -23,7 +23,7 @@ type ParametersPickersProps = {
 }
 export default function ParametersPickers({ data, parameters, setParameters }: ParametersPickersProps) {
   const unitDescriptions: DropdownUnit[] = getUnitDescriptions(data);
-  const [selectedIndex, setSelectedIndex] = useState<IntervalOption>(IntervalOption.Month);
+  const [selectedIndex, setSelectedIndex] = useState<IntervalOption>(parameters.interval);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {

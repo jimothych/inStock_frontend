@@ -84,14 +84,11 @@ export default function Main() {
     }
 
     const dt = DateTime.now();
-    const now = dt.toLocaleString(DateTime.TIME_WITH_SECONDS);
+    const now = dt.toLocaleString(DateTime.TIME_SIMPLE);
     setCurrentTime(now); //sending to Main.Context
 
-    const wasCached = (userSlice.receiptsList === receiptsData) &&
-                      (userSlice.currentNumProcessingDocs === currentNumProcessingDocsData);
-
-    console.log(`Main.tsx triggered at ${now} - using ${wasCached ? 'cached data to prevent re-rendering' : 'fresh data'}`);
-  }, [receiptsIsFetching, currentNumProcessingDocsIsFetching, receiptsData, currentNumProcessingDocsData, userSlice]);
+    console.log(`Main.tsx triggered at ${now}`);
+  }, [receiptsIsFetching, currentNumProcessingDocsIsFetching, receiptsData, currentNumProcessingDocsData]);
 
   //HANDLE ERROR QUERY STATE
   useEffect(function handleErrors() {

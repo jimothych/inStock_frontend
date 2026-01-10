@@ -64,7 +64,7 @@ export function forecast(data: Receipt[], params: Parameters): TargetResult {
   const newestDate = getNewestDate(data, params);
   if(!newestDate) return dummyTargetResult; //cannot forecast, no valid dates (just need one)
 
-  const sums = segmentData(data, params, newestDate);
+  const sums: number[] = segmentData(data, params, newestDate);
   const lambda = MathJS_mean(sums) as number;
 
   //https://en.wikipedia.org/wiki/Poisson_distribution#General
@@ -83,7 +83,7 @@ export function forecast(data: Receipt[], params: Parameters): TargetResult {
   return usePoisson(lambda, params);
 };
 
-function getNewestDate(data: Receipt[], params: Parameters): DateTime | null {
+export function getNewestDate(data: Receipt[], params: Parameters): DateTime | null {
   let newestDate;
   for(const receipt of data) {
     if (receipt.unit_description === params.label) {
@@ -100,8 +100,8 @@ function getNewestDate(data: Receipt[], params: Parameters): DateTime | null {
 export function segmentData(data: Receipt[], params: Parameters, newestDate: DateTime): number[] {
   const result: number[] = [];
 
-  const earliestDate = getOldestDate(data, params.label);
-  if (!earliestDate) return result;
+  const oldestDate = getOldestDate(data, params.label);
+  if (!oldestDate) return result;
 
   const intervalStep: Record<IntervalOption, { months?: number; days?: number }> = {
     [IntervalOption.Week]: { days: 7 },
@@ -117,7 +117,7 @@ export function segmentData(data: Receipt[], params: Parameters, newestDate: Dat
 
   // Start from the day AFTER newestDate to make it inclusive
   let end = newestDate.plus({ days: 1 });
-  while (end.minus(step) >= earliestDate) {
+  while (end.minus(step) >= oldestDate) {
     const start = end.minus(step);
     const interval = Interval.fromDateTimes(start, end);
     const total = sumQuantitiesInInterval(data, params.label, interval);
@@ -126,25 +126,25 @@ export function segmentData(data: Receipt[], params: Parameters, newestDate: Dat
   }
   
   // Handle the final partial interval
-  if (end > earliestDate) {
-    const interval = Interval.fromDateTimes(earliestDate, end);
+  if (end > oldestDate) {
+    const interval = Interval.fromDateTimes(oldestDate, end);
     const total = sumQuantitiesInInterval(data, params.label, interval);
     result.push(total);
   }
 
-  console.log(`Array of sums: ${JSON.stringify(result)} | TOTAL: ${MathJS_sum(result)}`);
+  //console.log(`Array of sums: ${JSON.stringify(result)} | TOTAL: ${MathJS_sum(result)}`);
   return result;
 }
 
-function getOldestDate(data: Receipt[], label: string): DateTime | null {
-  let earliest: DateTime | null = null;
+export function getOldestDate(data: Receipt[], label: string): DateTime | null {
+  let oldest: DateTime | null = null;
   for (const receipt of data) {
     if (receipt.unit_description !== label) continue;
     const dt = validateDate(receipt.transaction_date_time);
     if (!dt) continue;
-    if (!earliest || dt < earliest) earliest = dt;
+    if (!oldest || dt < oldest) oldest = dt;
   }
-  return earliest;
+  return oldest;
 }
 
 function sumQuantitiesInInterval(data: Receipt[], label: string, interval: Interval): number {
