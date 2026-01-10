@@ -63,8 +63,8 @@ export default function Main() {
       console.log(`\tMOUNTED & FETCHED, currentNumProcessingDocsData now CACHED`);
     }
     if(receiptsData) { 
-      sortByTransactionDate(receiptsData); //synchronous in-place chronological sort
-      dispatch(setReceiptsList(receiptsData)); 
+      const sortedReceipts = sortByTransactionDate(receiptsData);
+      dispatch(setReceiptsList(sortedReceipts)); 
       console.log(`\tMOUNTED & FETCHED, receiptsData now CACHED`);
     }
   }, [receiptsData, currentNumProcessingDocsData]); //update redux store only when fetched data changes state
@@ -106,7 +106,7 @@ export default function Main() {
     await GoogleSignin.signOut();
     dispatch(clearUser());
     navigation.dispatch(StackActions.replace('SignIn'));
-    console.log(`signed out | ${JSON.stringify(userSlice.id)}`);
+    console.log(`signed out | id: ${JSON.stringify(userSlice.id)}`);
     Toast.show({
       type: 'error',
       text1: "SIGNED OUT",

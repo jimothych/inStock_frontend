@@ -4,12 +4,28 @@ import { validateDate } from "../global/global";
 import { mean as MathJS_mean, std as MathJS_std, sum as MathJS_sum, sqrt as MathJS_sqrt } from "mathjs"
 import { normal, poisson } from '@stdlib/stats/base/dists'
 
+export enum IntervalOption {
+  Week = 0,
+  Month = 1,
+  Quarter = 2,
+}
+
+export function intervalOptionPrinter(option: IntervalOption): string {
+  switch(option) {
+    case IntervalOption.Week: return "week";
+    case IntervalOption.Month: return "month";
+    case IntervalOption.Quarter: return "quarter";
+    default: return "ENUM PRINT FAILED";
+  }
+}
+
+//to make it easier, interval is an enum, the actual luxon Interval is calculated separately
 export type Parameters = {
   label: string,
   lead_time: number,
   target_in_stock_probability: number,
   target_fill_rate: number,
-  date_range: Interval,
+  interval: IntervalOption,
   holding_cost_per_unit: number,
   backorder_cost_per_unit: number,
 }
@@ -23,43 +39,128 @@ export type TargetResult = {
   minimize_holding_and_backorder_costs: string,
 }
 
+const dummyTargetResult: TargetResult = {
+  target_in_stock_S: "_",
+  target_fill_S: "_",
+  target_lost_sales: "_",
+  minimize_holding_and_backorder_costs: "_",
+}
+
 /**
- * using order-up-to statistical formula from excel calculator template
- * all calculations are per date_range, not per entire set of data
+ * DISCUSSION: 
+ * no data will be shown if all dates are stale and we compute from DateTime.now(). to prevent this, we take the period from the latest transaction_date_time in our Receipt[] list, not from the current time, hence getNewestDate
+ */
+
+/**
+ * Using order-up-to statistical formula from excel calculator template.
+ * Caller must guarantee that input data is valid
  * @param data list of receipts
  * @param Parameters adjustable inputs for the given item label
- * @returns -1 if invalid inputs, S (order-up-to-level) otherwise
+ * @returns TargetResult
  */
-export function forecast(data: Receipt[], params: Parameters): TargetResult | null {
-  if(!data) { return null; }
-  const receipts = extractQuantities(data, params);
+export function forecast(data: Receipt[], params: Parameters): TargetResult {
+  console.log(`\n\n\tNEW CALCULATION: ${params.label}\n\tSTEP INTERVAL: ${intervalOptionPrinter(params.interval)}`);
 
-  if(MathJS_sum(receipts) as number <= 10) { //use poisson (number of events, not samples)
-    const lambda_single_period = MathJS_sum(receipts) as number;
-    return usePoisson(lambda_single_period, params);
+  const newestDate = getNewestDate(data, params);
+  if(!newestDate) return dummyTargetResult; //cannot forecast, no valid dates (just need one)
+
+  const sums = segmentData(data, params, newestDate);
+  const lambda = MathJS_mean(sums) as number;
+
+  //https://en.wikipedia.org/wiki/Poisson_distribution#General
+  //"If λ is greater than about 10, then the normal distribution is a good approximation if an appropriate continuity correction is performed, i.e., if P(X ≤ x), where x is a non-negative integer, is replaced by P(X ≤ x + 0.5)"
+  if (lambda >= 10) {
+    const mean = lambda;
+    const std = MathJS_std(sums) as unknown as number;
+    if (std > 0) {
+      console.log(`using gaussian | mean: ${mean} std: ${std}`);
+      return useGaussian(lambda, std, params);
+    }
   }
-  //else use normal
-  const mean = MathJS_mean(receipts) as number;
-  const standard_deviation =  MathJS_std(receipts) as unknown as number;
-  return useGaussian(mean, standard_deviation, params);
+
+  // default + fallback
+  console.log(`using poisson | lambda: ${lambda}`);
+  return usePoisson(lambda, params);
 };
 
-function extractQuantities(data: Receipt[], params: Parameters): number[] {
-  let receipts: number[] = [];
-  
-  for (const receipt of data) {
-    if (params.label !== receipt.unit_description) continue;
-    const dt = validateDate(receipt.transaction_date_time!);
-    if (!dt || !params.date_range.contains(dt)) continue;
-
-    receipts.push(receipt.quantity);
+function getNewestDate(data: Receipt[], params: Parameters): DateTime | null {
+  let newestDate;
+  for(const receipt of data) {
+    if (receipt.unit_description === params.label) {
+      newestDate = validateDate(receipt.transaction_date_time);
+      return newestDate; //first match is the newest, data comes in sorted newest to oldest
+    }
   }
 
-  return receipts;
+  return null;
+}
+
+//MAIN HELPER
+//we need to return an array of sums (the sum of quantities in each interval)
+export function segmentData(data: Receipt[], params: Parameters, newestDate: DateTime): number[] {
+  const result: number[] = [];
+
+  const earliestDate = getOldestDate(data, params.label);
+  if (!earliestDate) return result;
+
+  const intervalStep: Record<IntervalOption, { months?: number; days?: number }> = {
+    [IntervalOption.Week]: { days: 7 },
+    [IntervalOption.Month]: { months: 1 },
+    [IntervalOption.Quarter]: { months: 3 },
+  };
+  
+  const step = intervalStep[params.interval];
+  if (!step) {
+    console.error("error getting step interval...");
+    return result;
+  }
+
+  // Start from the day AFTER newestDate to make it inclusive
+  let end = newestDate.plus({ days: 1 });
+  while (end.minus(step) >= earliestDate) {
+    const start = end.minus(step);
+    const interval = Interval.fromDateTimes(start, end);
+    const total = sumQuantitiesInInterval(data, params.label, interval);
+    result.push(total);
+    end = start;
+  }
+  
+  // Handle the final partial interval
+  if (end > earliestDate) {
+    const interval = Interval.fromDateTimes(earliestDate, end);
+    const total = sumQuantitiesInInterval(data, params.label, interval);
+    result.push(total);
+  }
+
+  console.log(`Array of sums: ${JSON.stringify(result)} | TOTAL: ${MathJS_sum(result)}`);
+  return result;
+}
+
+function getOldestDate(data: Receipt[], label: string): DateTime | null {
+  let earliest: DateTime | null = null;
+  for (const receipt of data) {
+    if (receipt.unit_description !== label) continue;
+    const dt = validateDate(receipt.transaction_date_time);
+    if (!dt) continue;
+    if (!earliest || dt < earliest) earliest = dt;
+  }
+  return earliest;
+}
+
+function sumQuantitiesInInterval(data: Receipt[], label: string, interval: Interval): number {
+  let total = 0;
+  for (const receipt of data) {
+    if (receipt.unit_description !== label) continue;
+    const dt = validateDate(receipt.transaction_date_time);
+    if (!dt || !interval.contains(dt)) continue;
+    total += receipt.quantity;
+  }
+  return total;
 }
 
 export function useGaussian(mean: number, standard_deviation: number, params: Parameters): TargetResult {
-  const mu = (1+params.lead_time)*mean; //mean demand over l+1 periods
+  const mu_no_correction = (1+params.lead_time)*mean; //mean demand over l+1 periods
+  const mu = mu_no_correction + 0.5; //continuity correction poisson to normal from wikipedia
   const sigma = (MathJS_sqrt(1+params.lead_time) as number)*standard_deviation; //standard deviation demand over l+1 periods
 
   //https://stdlib.io/docs/api/latest/@stdlib/stats/base/dists/normal
@@ -82,17 +183,19 @@ export function useGaussian(mean: number, standard_deviation: number, params: Pa
   return result;
 }
 
-export function usePoisson(lambda_single_period: number, params: Parameters): TargetResult {
-  const lambda = lambda_single_period*(1+params.lead_time); //mean demand over l+1 periods
+export function usePoisson(lambda: number, params: Parameters): TargetResult {
+  const lambda_forecast = lambda*(1+params.lead_time); //mean demand over l+1 periods
 
   const critical_ratio = params.backorder_cost_per_unit/(params.backorder_cost_per_unit + params.holding_cost_per_unit);
+  
+  const rounded_lost_sales = Math.round(lambda * (1 - params.target_fill_rate));
 
   //https://stdlib.io/docs/api/latest/@stdlib/stats/base/dists/poisson/quantile
   const result: TargetResult = {
-    target_in_stock_S: (poisson.quantile(params.target_in_stock_probability, lambda)).toString(),
-    target_lost_sales: (lambda_single_period*(1-params.target_fill_rate)).toFixed(4), //not a proportion
-    target_fill_S: (poisson.quantile(params.target_fill_rate, lambda)).toString(),
-    minimize_holding_and_backorder_costs: (poisson.quantile(critical_ratio, lambda)).toString(),
+    target_in_stock_S: (poisson.quantile(params.target_in_stock_probability, lambda_forecast)).toString(),
+    target_lost_sales: rounded_lost_sales.toString(), //not a proportion
+    target_fill_S: (poisson.quantile(params.target_fill_rate, lambda_forecast)).toString(),
+    minimize_holding_and_backorder_costs: (poisson.quantile(critical_ratio, lambda_forecast)).toString(),
   }
   return result;
 }

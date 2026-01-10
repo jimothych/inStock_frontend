@@ -19,7 +19,7 @@ export default function SettingsPage() {
     await GoogleSignin.signOut();
     dispatch(clearUser());
     navigation.dispatch(StackActions.replace('SignIn'));
-    console.log(`signed out | ${JSON.stringify(userSlice.id)}`);
+    console.log(`signed out | id: ${JSON.stringify(userSlice.id)}`);
     Toast.show({
       type: 'info',
       text1: "SIGNED OUT",

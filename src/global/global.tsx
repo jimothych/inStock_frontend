@@ -81,7 +81,9 @@ export function ensureError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e));
 }
 
-export function validateDate(str: string): DateTime | null {
+export function validateDate(str: string | null): DateTime | null {
+  if(!str) return null;
+
   let dt = DateTime.fromFormat(str, 'MM-dd-yyyy');
   if (!dt.isValid) {
     dt = DateTime.fromFormat(str, 'yyyy-MM-dd');
@@ -95,10 +97,12 @@ export function validateDate(str: string): DateTime | null {
   return dt;
 }
 
+/** Sorts newest to oldest. Invalid dates are pushed to end of array
+ */
 export function sortByTransactionDate(arr: Receipt[]): Receipt[] {
   return [...arr].sort((a, b) => {
-    let dateA = validateDate(a.transaction_date_time!);
-    let dateB = validateDate(b.transaction_date_time!);
+    let dateA = validateDate(a.transaction_date_time);
+    let dateB = validateDate(b.transaction_date_time);
 
     if (!dateA && !dateB) return 0; //nothing happens
     if (!dateA) return 1;   // a goes after b
@@ -120,12 +124,12 @@ export const GlobalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     //alignSelf: "center",
-    width: "92%",
+    width: "95%",
     marginTop: 6,
     marginBottom: 6,
     padding: 30,
     borderRadius: 8,
-    backgroundColor: theme.white2,
+    backgroundColor: theme.white3,
   },
   loadingBar: {
     height: 4, 
