@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jimothych.instock",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,10 +28,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash_screen.png",
-          "resizeMode": "stretch",
-          "imageWidth": 1000,
-          "backgroundColor": "#210340",
-          "enableFullScreenImage_legacy": true
+          "backgroundColor": "#210340"
         }
       ],
       [
