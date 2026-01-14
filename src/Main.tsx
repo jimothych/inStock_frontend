@@ -132,7 +132,8 @@ export default function Main() {
         tabBarInactiveTintColor: theme.white3,
         tabBarLabelStyle: {
           fontSize: 14,
-          fontFamily: 'Inter_28pt-Regular',
+          fontFamily: 'Inter', 
+          fontWeight: '400'
         },
       }}
     >
