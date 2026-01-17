@@ -72,6 +72,7 @@ export default function ParametersPickers({ data, parameters, setParameters }: P
         style={styles.segmentedControl}
         fontStyle={{color: theme.white, fontSize: 15, fontWeight: "normal" }}
         activeFontStyle={{color: theme.white, fontSize: 16, fontWeight: "bold" }}
+        appearance="dark"
       />
     </View>
   );
