@@ -29,6 +29,7 @@ export default function Main() {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [currentTime, setCurrentTime] = useState<string>('_');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   //isLoading - When true, indicates that the query is currently loading for the first time, and has no data yet. This will be true for the first request fired off, but not for subsequent requests.
   //isFetching - When true, indicates that the query is currently fetching, but might have data from an earlier request. This will be true for both the first request fired off, as well as subsequent requests.
@@ -50,6 +51,7 @@ export default function Main() {
 
   //handleRefresh passed into Main.Context
   const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
     refetchReceipts();
     refetchNumProcessing();
   }, [refetchReceipts, refetchNumProcessing]);
@@ -86,6 +88,7 @@ export default function Main() {
     const dt = DateTime.now();
     const now = dt.toLocaleString(DateTime.TIME_SIMPLE);
     setCurrentTime(now); //sending to Main.Context
+    setIsRefreshing(false);
 
     console.log(`Main.tsx triggered at ${now}`);
   }, [receiptsIsFetching, currentNumProcessingDocsIsFetching, receiptsData, currentNumProcessingDocsData]);
@@ -117,7 +120,7 @@ export default function Main() {
     <MainContext.Provider 
       value={{ 
         onRefresh: handleRefresh,
-        isLoading: isLoading,
+        isLoading: isRefreshing,
         currentTime: currentTime,
       }}
     >
