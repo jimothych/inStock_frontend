@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import theme from "../global/theme";
 import { GlobalStyles } from "../global/global";
@@ -14,11 +14,22 @@ import { useDeleteReceiptItemMutation } from "../redux/apiSlice";
 export default function ReceiptsFlashList(){
   const context = useContext(MainContext);
   const userSlice = useSelector((state: RootState) => state.user);
-
+  const [localRefreshing, setLocalRefreshing] = useState(false);
+  
   const dataValid: boolean = !!userSlice.receiptsList && 
                             userSlice.receiptsList.length > 0;
-
   const data = dataValid ? userSlice.receiptsList : [{ dummy: true } as any];
+
+  const handleRefresh = useCallback(() => {
+    setLocalRefreshing(true);
+    context?.onRefresh();
+  }, [context]);
+
+  useEffect(() => {
+    if (!context?.isLoading) {
+      setLocalRefreshing(false);
+    }
+  }, [context?.isLoading]);
 
   return (
     <>
@@ -35,8 +46,8 @@ export default function ReceiptsFlashList(){
           )
         }
         style={{ flex: 1, width: "100%" }}
-        onRefresh={context?.onRefresh}
-        refreshing={context?.isLoading}
+        onRefresh={handleRefresh}
+        refreshing={localRefreshing}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useCallback, useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import theme from "./theme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +27,18 @@ export function SafeArea(props: SafeAreaProps) {
 
 export function Scroll({ children }: { children: React.ReactNode }) {
   const context = useContext(MainContext);
+  const [localRefreshing, setLocalRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(() => {
+    setLocalRefreshing(true);
+    context?.onRefresh();
+  }, [context]);
+
+  useEffect(() => {
+    if (!context?.isLoading) {
+      setLocalRefreshing(false);
+    }
+  }, [context?.isLoading]);
 
   return (
     <ScrollView
@@ -34,8 +46,8 @@ export function Scroll({ children }: { children: React.ReactNode }) {
       contentContainerStyle={{ alignItems: "center" }}
       refreshControl={
         <RefreshControl
-          refreshing={context!.isLoading}
-          onRefresh={context?.onRefresh}
+          refreshing={localRefreshing}
+          onRefresh={handleRefresh}
         />
       }
     >
