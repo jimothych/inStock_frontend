@@ -120,7 +120,7 @@ export default function Main() {
     <MainContext.Provider 
       value={{ 
         onRefresh: handleRefresh,
-        isLoading: isRefreshing,
+        isLoading: isRefreshing || isLoading,
         currentTime: currentTime,
       }}
     >
@@ -135,8 +135,7 @@ export default function Main() {
         tabBarInactiveTintColor: theme.white3,
         tabBarLabelStyle: {
           fontSize: 14,
-          fontFamily: 'Inter', 
-          fontWeight: '400'
+          fontFamily: 'Inter_400Regular'
         },
       }}
     >

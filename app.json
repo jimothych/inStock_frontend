@@ -34,19 +34,6 @@
         }
       ],
       [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/Inter_28pt-Regular.ttf",
-            "./assets/fonts/Inter_28pt-Bold.ttf",
-            "./assets/fonts/Inter_28pt-Italic.ttf",
-            "./assets/fonts/Inter_28pt-LightItalic.ttf",
-            "./assets/fonts/Inter_28pt-BoldItalic.ttf",
-            "./assets/fonts/Inter_28pt-Light.ttf"
-          ]
-        }
-      ],
-      [
         "@react-native-google-signin/google-signin",
         {
           "iosUrlScheme": "com.googleusercontent.apps.366513490502-t63q7meg415m6r4r6dva3qb269crs1p3"

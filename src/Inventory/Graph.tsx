@@ -75,18 +75,14 @@ export default function Graph({ receipts, parameters, forecastResults } : GraphP
 
                 // X-axis label styling
                 xAxisLabelTextStyle={{
-                  fontFamily: 'Inter', 
-                  fontWeight: '700', 
-                  fontStyle: 'italic',
+                  fontFamily: 'Inter_700Bold_Italic',
                   fontSize: 10,
                   color: theme.black,
                 }}
                 
                 // Y-axis label styling
                 yAxisTextStyle={{
-                  fontFamily: 'Inter', 
-                  fontWeight: '700', 
-                  fontStyle: 'italic',
+                  fontFamily: 'Inter_700Bold_Italic',
                   fontSize: 10,
                   color: theme.black,
                 }}

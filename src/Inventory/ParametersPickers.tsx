@@ -70,8 +70,8 @@ export default function ParametersPickers({ data, parameters, setParameters }: P
           setSelectedIndex(event.nativeEvent.selectedSegmentIndex)
         }}
         style={styles.segmentedControl}
-        fontStyle={{color: theme.black, fontSize: 15, fontFamily: "Inter", fontWeight: "400"}}
-        activeFontStyle={{color: theme.black, fontSize: 15, fontFamily: "Inter", fontWeight: "700"}}
+        fontStyle={{color: theme.black, fontSize: 15, fontFamily: "Inter_400Regular"}}
+        activeFontStyle={{color: theme.black, fontSize: 15, fontFamily: "Inter_700Bold"}}
       />
     </View>
   );

@@ -146,35 +146,27 @@ export const GlobalStyles = StyleSheet.create({
   },
 
   bold: {
-    fontFamily: 'Inter',
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     fontSize: 21,
   },
   r: {
-    fontFamily: 'Inter',
-    fontWeight: '400',
+    fontFamily: 'Inter_400Regular',
     fontSize: 17,
   },
   bold_italic: {
-    fontFamily: 'Inter',
-    fontWeight: '700',
-    fontStyle: 'italic',
+    fontFamily: 'Inter_700Bold_Italic',
     fontSize: 21,
   },
   italic: {
-    fontFamily: 'Inter',
-    fontStyle: 'italic',
+    fontFamily: 'Inter_400Regular_Italic',
     fontSize: 17,
   },
   light: {
-    fontFamily: 'Inter',
-    fontWeight: '300',
+    fontFamily: 'Inter_300Light',
     fontSize: 14,
   },
   light_italic: {
-    fontFamily: 'Inter',
-    fontWeight: '300',
-    fontStyle: 'italic',
+    fontFamily: 'Inter_300Light_Italic',
     fontSize: 14,
   },
 });
