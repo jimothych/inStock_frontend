@@ -132,8 +132,8 @@ export function segmentData(data: Receipt[], params: Parameters, newestDate: Dat
     result.push(total);
   }
 
-  //console.log(`Array of sums: ${JSON.stringify(result)} | TOTAL: ${MathJS_sum(result)}`);
-  return result;
+  //console.log(`Array of sums: ${JSON.stringify(result.reverse())} | TOTAL: ${MathJS_sum(result)}`);
+  return result.reverse();
 }
 
 export function getOldestDate(data: Receipt[], label: string): DateTime | null {
